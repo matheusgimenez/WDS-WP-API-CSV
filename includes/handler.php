@@ -22,8 +22,12 @@ class WDS_WP_API_CSV_Handler {
 		if ( empty( $result->data ) ) {
 			return $served;
 		}
+		if ( ! $request->get_route() || empty ( $request->get_route() ) ) {
+			return $served;
+		}
 
-		$file = 'report.csv';
+		// remove first letter from route and replace '/' to '-' for use route as filename
+		$file = substr( str_replace( '/', '-', $request->get_route() ) . '.csv', 1 );
 		header( "Content-Type: ;charset=utf-8" );
 		header( "Content-Disposition: attachment;filename=\"$file\"" );
 		header( "Pragma: no-cache" );

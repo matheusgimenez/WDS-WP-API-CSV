@@ -142,9 +142,7 @@ class WDS_WP_API_CSV {
 		register_activation_hook( __FILE__, array( $this, '_activate' ) );
 		register_deactivation_hook( __FILE__, array( $this, '_deactivate' ) );
 
-		if ( $this->check_requirements() ) {
-			add_filter( 'rest_pre_serve_request', array( $this->csv_handler, 'check_for_csv_and_overload' ), 10, 4 );
-		}
+		add_filter( 'rest_pre_serve_request', array( $this->csv_handler, 'check_for_csv_and_overload' ), 10, 4 );
 	}
 
 	/**
@@ -166,60 +164,6 @@ class WDS_WP_API_CSV {
 	 * @return null
 	 */
 	function _deactivate() {}
-
-	/**
-	 * Check that all plugin requirements are met
-	 *
-	 * @since  0.1.0
-	 * @return boolean
-	 */
-	public static function meets_requirements() {
-		$plugin = 'wp-api/plugin.php';
-
-		$plugins_activated = apply_filters( 'active_plugins', get_option( 'active_plugins' ) );
-		$plugins_network_activated = apply_filters( 'active_sitewide_plugins', get_site_option( 'active_sitewide_plugins' ) );
-
-		// Normal plugin activation looks different than network-wide activation
-		$plugin_activated = in_array( $plugin, $plugins_activated );
-		$plugin_network_activated = array_key_exists( $plugin, $plugins_network_activated );
-
-		return $plugin_activated || $plugin_network_activated;
-	}
-
-	/**
-	 * Check if the plugin meets requirements and
-	 * disable it if they are not present.
-	 *
-	 * @since  0.1.0
-	 * @return boolean result of meets_requirements
-	 */
-	public function check_requirements() {
-		if ( ! $this->meets_requirements() ) {
-
-			// Add a dashboard notice
-			add_action( 'all_admin_notices', array( $this, 'requirements_not_met_notice' ) );
-
-			// Deactivate our plugin
-			deactivate_plugins( $this->basename );
-
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Adds a notice to the dashboard if the plugin requirements are not met
-	 *
-	 * @since  <%= version %>
-	 * @return null
-	 */
-	public function requirements_not_met_notice() {
-		// Output our error
-		echo '<div id="message" class="error">';
-		echo '<p>' . sprintf( __( 'WDS WP-API CSV is missing requirements (the WP REST API plugin) and has been <a href="%s">deactivated</a>. Please make sure all requirements are available.', 'wds-wp-api-csv' ), admin_url( 'plugins.php' ) ) . '</p>';
-		echo '</div>';
-	}
 
 	/**
 	 * Magic getter for our object.
